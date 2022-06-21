@@ -1,0 +1,204 @@
+from doctest import OutputChecker
+from weakref import finalize
+import PySimpleGUI as sg
+from pytube import YouTube 
+from pytube import Playlist
+import os
+from pytube import Search
+
+#Criando janelas e estilos(layouts)
+def window_login():
+    sg.theme('Reddit')
+    layout = [
+        [sg.Text('Escolha o modo de dowloand')],
+        [sg.Button('MP4', key= 'video'), sg.Button('MP3', key= 'musica')] # "key" será a forma como o codigo reconhecerá quando o botão for apertado
+    ]
+    return sg.Window('Pagina Inicial', layout= layout, finalize= True)
+
+def window_mp4():
+    sg.theme('Reddit')
+    layout = [
+        [sg.Text('Escolha a forma de dowloand:')],
+        [sg.Button('Pesquisar', key='pesquisar')],
+        [sg.Button('Link/URl', key= 'link')], # "key" será a forma como o codigo reconhecerá quando o botão for apertado
+        [sg.Button('Playlist', key= 'playlist')], # "key" será a forma como o codigo reconhecerá quando o botão for apertado
+        [sg.Button('Voltar', key= 'voltar')] # "key" será a forma como o codigo reconhecerá quando o botão for apertado
+    ]
+    return sg.Window('MP4', layout=layout, finalize=True)
+
+def window_mp3():
+    sg.theme('Reddit')
+    layout= [
+        [sg.Text('Escolha a forma de dowloand:')],
+        [sg.Button('Link', key='link')], # "key" será a forma como o codigo reconhecerá quando o botão for apertado
+        [sg.Button('Playlist', key= 'playlist')], # "key" será a forma como o codigo reconhecerá quando o botão for apertado
+        [sg.Button('Voltar', key= 'voltar')]  # "key" será a forma como o codigo reconhecerá quando o botão for apertado
+    ]
+    return sg.Window('MP3', layout=layout, finalize= True)
+    
+def window_mp4_pesquisar():
+    sg.theme('Reddit')
+    layout = [
+        [sg.Text('Digite o nome do video desejado:'), sg.InputText()],
+        [sg.Button('Procurar', key='procurar'), sg.Button('Voltar', key='voltar')]
+    ]
+    return sg.Window('Pesquisar', layout= layout, finalize=True)
+
+def window_mp4_link():
+    sg.theme('Reddit')
+    layout = [
+        [sg.Text('Digite o link do video:'), sg.InputText()],
+        [sg.Text('Informe a pasta a ser salva:'), sg.InputText(), sg.FolderBrowse()], #o "InputText" sera preenchido por uma pasta que vc escolhera por causa do "FolderBrowse"
+        [sg.Button('Continuar', key= 'continuar'), sg.Button('Voltar', key='voltar')] # "key" será a forma como o codigo reconhecerá quando o botão for apertado
+    ]
+    return sg.Window('Dowloand MP4 link', layout=layout, finalize= True)
+
+def window_mp4_playlist():
+    sg.theme('Reddit')
+    layout = [
+        [sg.Text('Digite o link da playlist:'), sg.InputText()],
+        [sg.Text('Informe a pasta a ser salva:'), sg.InputText(), sg.FolderBrowse()], #o "InputText" sera preenchido por uma pasta que vc escolhera por causa do "FolderBrowse"
+        [sg.Button('Continuar', key='continuar'), sg.Button('Voltar', key='voltar')] # "key" será a forma como o codigo reconhecerá quando o botão for apertado
+    ]
+    return sg.Window('Downloand MP4 playlist', layout=layout, finalize=True)
+
+def window_mp3_link():
+    sg.theme('Reddit')
+    layout = [
+        [sg.Text('Digite o link da musica:'), sg.InputText()],
+        [sg.Text('Informe a pasta a ser salva:'), sg.InputText(), sg.FolderBrowse()], #o "InputText" sera preenchido por uma pasta que vc escolhera por causa do "FolderBrowse" 
+        [sg.Button('Continuar', key= 'continuar'), sg.Button('Voltar', key='voltar')] # "key" será a forma como o codigo reconhecerá quando o botão for apertado
+    ]
+    return sg.Window('Dowloand MP3 link', layout=layout, finalize= True)
+
+def window_mp3_playlist():
+    sg.theme('Reddit')
+    layout = [
+        [sg.Text('Digite o link da playlist:'), sg.InputText()],
+        [sg.Text('Informe a pasta a ser salva:'), sg.InputText(), sg.FolderBrowse()], #o "InputText" sera preenchido por uma pasta que vc escolhera por causa do "FolderBrowse"
+        [sg.Button('Continuar', key='continuar'), sg.Button('Voltar', key='voltar')] # "key" será a forma como o codigo reconhecerá quando o botão for apertado
+    ]
+    return sg.Window('Dowloand MP3 playlist', layout=layout, finalize=True)
+
+#Criando Janelas
+
+window1, window2, window3, window4, window5, window6, window7 = window_login(), None, None, None, None, None, None
+window8, window9 = None, None
+
+#Apenas a window1 tem uma janela atribuida pois as outras serao definidas com o decorrer do codigo 
+
+#Criando loop de leitura de eventos
+while True:
+    window, event, values = sg.read_all_windows()
+    if window == window1 and event == sg.WIN_CLOSED:
+        break
+
+    #passando da janela 1 pra 2 (Video)
+    if window == window1 and event == 'video': 
+        window2 = window_mp4()
+        window1.hide()  
+    if window == window2 and event == 'voltar': #voltando pra janela 1
+        window2.hide()
+        window1.un_hide()
+    if window == window2 and event == sg.WIN_CLOSED: #fechando a janela
+        break
+
+    #passando para janela 8 (pesquisar)
+
+    if window == window2 and event == 'pesquisar':
+        window8 = window_mp4_pesquisar()
+        window2.hide()
+    if window == window8 and event == 'voltar':
+        window8.hide()
+        window2.un_hide()
+    
+    #Pesquisando o video
+
+    if window == window8 and event == sg.WIN_CLOSED:
+        break
+    if window == window8 and event == 'procurar':
+        pesquisa = Search(values[0])
+        
+        print(pesquisa.results)
+        
+    #passando pra janela 4 (Link)
+
+    if window == window2 and event == 'link': 
+        window4 = window_mp4_link()
+        window2.hide()
+    
+    if window == window4 and event == 'voltar': #voltando pra janela 2
+        window4.hide()
+        window2.un_hide()
+    if window == window4 and event == sg.WIN_CLOSED: #fechando janela
+        break
+    if window == window4 and event == 'continuar':
+        video = YouTube(values[0])
+        video.streams.get_highest_resolution().download(output_path=(values[1]))
+        sg.popup_ok(f'{video.title} foi baixado com sucesso!!! ')
+        
+        
+    #passando pra janela 5 (Playlist)
+
+    if window == window2 and event == 'playlist':
+        window5 = window_mp4_playlist()
+        window2.hide()
+    if window == window5 and event == 'voltar': #voltando pra janela 2
+        window5.hide()
+        window2.un_hide()
+    if window == window5 and event == sg.WIN_CLOSED: #fechando janela
+        break
+    if window == window5 and event == 'continuar':
+        playlist = Playlist(values[0])
+        for videos in playlist:
+            yt = YouTube(videos)
+        yt.streams.get_highest_resolution().download(output_path=(values[1]))
+        sg.popup_ok(f'{playlist.title} foi baixada com sucesso!!!')
+
+    #passando da janela 1 pra 3 (Musica)
+    if window == window1 and event == 'musica':
+        window3 = window_mp3()    
+        window1.hide()
+    if window == window3 and event == 'voltar': #voltando pra janela 1
+        window3.hide()
+        window1.un_hide()
+    if window == window3 and event == sg.WIN_CLOSED: #fechando a janela
+        break
+
+    #passando pra janela 6 (Link Musica)
+    if window == window3 and event == 'link':
+        window6 = window_mp3_link()
+        window3.hide()
+    if window == window6 and event == 'voltar':
+        window6.hide()
+        window3.un_hide()
+    if window == window6 and event == sg.WIN_CLOSED: #fechando a janela
+        break 
+    if window == window6 and event == 'continuar':
+        video = YouTube(values[0]).streams.get_audio_only()
+        out_file = video.download(output_path=(values[1]))
+        base, ext = os.path.splitext(out_file)
+        new_file = base + '.mp3'
+        sg.PopupOK(f'"{video.title}" foi baixada com sucesso!!!')
+
+    #passando pra janela 7 (Link Playlist)
+    if window == window3 and event == 'playlist':
+        window7 = window_mp3_playlist()
+        window3.hide()
+    if window == window7 and event == 'voltar': #voltando pra janela 2
+        window7.hide()
+        window3.un_hide()
+    if window == window7 and event == sg.WIN_CLOSED: #fechando janela
+        break
+    if window == window7 and event == 'continuar':
+        playlist = Playlist(values[0])
+        for videos in playlist:
+            yt = YouTube(videos).streams.get_audio_only()
+            out_file = yt.download(output_path=(values[1]))
+            base, ext = os.path.splitext(out_file)
+            new_file = base +'.mp3'
+            sg.PopupOK(f'"{playlist.title}" foi baixada com sucesso!!!')
+
+        sg.popup_ok(f'{playlist.title} foi baixada com sucesso!!!')
+    
+   
